@@ -16,11 +16,11 @@ class Menu(tools.States):
         self.from_bottom = 200
         self.spacer = 75
         self.menu_balls = []
-        for i in range(15):
-            random_color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
-            ball = ball_.Ball(self.screen_rect, 10,10, random_color, menu=True)
-            ball.speed = random.randint(3,8)
-            ball = self.menu_balls.append(ball)
+        # for i in range(15):
+        #     random_color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
+        #     ball = ball_.Ball(self.screen_rect, 10,10, random_color, menu=True)
+        #     ball.speed = random.randint(3,8)
+        #     ball = self.menu_balls.append(ball)
 
     def get_event(self, event, keys):
         if event.type == pg.QUIT:

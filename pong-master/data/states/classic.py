@@ -36,7 +36,7 @@ class Classic(tools.States):
         self.ball = ball_.Ball(self.screen_rect, 10,10, (0,255,0))
         self.paddle_left = paddle.Paddle(padding,paddle_y, paddle_width,paddle_height, (150,150,150))
         self.paddle_right = paddle.Paddle(pad_right,paddle_y, paddle_width,paddle_height, (150,150,150))
-        r.publish("paddle", self.paddle_right)
+        r.publish("paddle", self.paddle_right.rect.center[1])
 
         self.ai = AI.AIPaddle(self.screen_rect, self.ball.rect, difficulty)
         
@@ -71,11 +71,11 @@ class Classic(tools.States):
         #if keys[self.controller_dict['up']]:
         if keys[pg.K_UP] or keys[pg.K_w]:
             self.paddle_right.move(0, -1)
-            r.publish("paddle", self.paddle_right.rect)
+            r.publish("paddle", self.paddle_right.rect[1])
         #if keys[self.controller_dict['down']]:
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.paddle_right.move(0, 1)
-            r.publish("paddle", self.paddle_right.rect)
+            r.publish("paddle", self.paddle_right.rect[1])
         
     def update(self, now, keys):
         if not self.pause:

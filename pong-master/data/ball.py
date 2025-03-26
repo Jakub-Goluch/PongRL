@@ -99,7 +99,8 @@ class Ball:
         if hit_side:
             return hit_side
         self.move()
-        r.publish("ball", self.rect.center)
+        r.publish("ball_x", self.rect.center[0])
+        r.publish("ball_y", self.rect.center[1])
         self.collide_paddle(paddle_left_rect, paddle_right_rect)
         if self.speed_incr >= self.switch_speed:
             self.speed += 1
