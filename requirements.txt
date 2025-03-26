@@ -1,3 +1,2 @@
-pytorch
+torch
 matplotlib==3.9
-ipython

@@ -5,9 +5,6 @@ from .. import paddle
 from .. import tools
 from .. import AI
 import random
-import redis
-
-r = redis.Redis()
 
 class Classic(tools.States):
     def __init__(self, screen_rect, difficulty): 
@@ -36,7 +33,6 @@ class Classic(tools.States):
         self.ball = ball_.Ball(self.screen_rect, 10,10, (0,255,0))
         self.paddle_left = paddle.Paddle(padding,paddle_y, paddle_width,paddle_height, (150,150,150))
         self.paddle_right = paddle.Paddle(pad_right,paddle_y, paddle_width,paddle_height, (150,150,150))
-        r.publish("paddle", self.paddle_right.rect.center[1])
 
         self.ai = AI.AIPaddle(self.screen_rect, self.ball.rect, difficulty)
         
@@ -44,6 +40,9 @@ class Classic(tools.States):
         self.pause = False
         self.score = [0,0]
         self.ball.set_ball()
+        self.paddle_left.rect.y = self.screen_rect.centery - (100 // 2)
+        self.paddle_right.rect.y = self.screen_rect.centery - (100 // 2)
+
     
     def get_event(self, event, keys):
         if event.type == pg.QUIT:
@@ -71,11 +70,9 @@ class Classic(tools.States):
         #if keys[self.controller_dict['up']]:
         if keys[pg.K_UP] or keys[pg.K_w]:
             self.paddle_right.move(0, -1)
-            r.publish("paddle", self.paddle_right.rect[1])
         #if keys[self.controller_dict['down']]:
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.paddle_right.move(0, 1)
-            r.publish("paddle", self.paddle_right.rect[1])
         
     def update(self, now, keys):
         if not self.pause:
@@ -87,8 +84,12 @@ class Classic(tools.States):
             hit_side = self.ball.update(self.paddle_left.rect, self.paddle_right.rect)
             if hit_side:
                 self.adjust_score(hit_side)
+                self.paddle_left.rect.y = self.screen_rect.centery - (100 // 2)
+                self.paddle_right.rect.y = self.screen_rect.centery - (100 // 2)
+                # self.reset()
             self.movement(keys)
-            print(self.ball.rect[0], self.ball.rect[1], self.paddle_right.rect[1], self.score[0], self.score[1], flush=True)
+            print(self.ball.rect[0], self.ball.rect[1], self.paddle_right.rect[1], self.score[1], self.ball.point, flush=True)
+            self.ball.point = 0
         else:
             self.pause_text, self.pause_rect = self.make_text("PAUSED",
                 (255,255,255), self.screen_rect.center, 50)

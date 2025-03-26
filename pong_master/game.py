@@ -18,8 +18,8 @@ parser.add_argument('-s' , '--size', nargs=2, default=[800,600], metavar=('WIDTH
 args = vars(parser.parse_args())
 
 if __name__ == '__main__':
+    print("pygame", flush=True)
     accepted_difficulty = ['hard', 'medium', 'easy']
-    
     if args['difficulty']:
         if args['difficulty'].lower() in accepted_difficulty:
             difficulty = args['difficulty'].lower()

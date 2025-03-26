@@ -2,9 +2,7 @@
 import pygame as pg
 import random
 from . import tools
-import redis
 
-r = redis.Redis()
 
 class Ball:
     def __init__(self, screen_rect, width, height, color=(255,255,255), menu=False, speed=3):
@@ -24,6 +22,7 @@ class Ball:
         self.set_ball()
         self.sound_init()
         self.moving_away_from_AI = False
+        self.point = 0
         
     def sound_init(self):
         self.bounce = tools.Sound('boing.wav')
@@ -34,7 +33,8 @@ class Ball:
     def get_random_float(self):
         '''get float for velocity of ball on starting direction'''
         while True:
-            num = random.uniform(-1.0, 1.0)
+            # num = random.uniform(-1.0, 1.0)
+            num = 1.0
             if num > -.5 and num < .5:
                 continue
             else:
@@ -42,7 +42,7 @@ class Ball:
         
         
     def set_ball(self):
-        x = self.get_random_float()
+        x = self.get_random_float() + 1
         y = self.get_random_float()
         if x < 0:
             self.moving_away_from_AI = False
@@ -68,11 +68,11 @@ class Ball:
         if self.rect.y < 0 or self.rect.y > self.screen_rect.bottom - self.height:
             if not self.menu:
                 self.bounce.sound.play()
-            self.vel[1] *= -1;
+            self.vel[1] *= -1
             
         if self.menu:
             if self.rect.x < 0 or self.rect.x > self.screen_rect.right- self.height:
-                self.vel[0] *= -1;
+                self.vel[0] *= -1
         return 0
             
     def collide_paddle(self, paddle_left_rect, paddle_right_rect):
@@ -80,14 +80,16 @@ class Ball:
             if not self.menu:
                 self.bounce.sound.play()
             self.moving_away_from_AI = True
-            self.vel[0] *= -1;
+            self.vel[0] *= -1
             self.speed_incr += 1
         elif self.rect.colliderect(paddle_right_rect):
             if not self.menu:
                 self.bounce.sound.play()
+
             self.moving_away_from_AI = False
-            self.vel[0] *= -1;
+            self.vel[0] *= -1
             self.speed_incr += 1
+            self.point = 1
             
     def move(self):
         self.true_pos[0] += self.vel[0] * self.speed
@@ -99,8 +101,6 @@ class Ball:
         if hit_side:
             return hit_side
         self.move()
-        r.publish("ball_x", self.rect.center[0])
-        r.publish("ball_y", self.rect.center[1])
         # print(self.rect.center)
         self.collide_paddle(paddle_left_rect, paddle_right_rect)
         if self.speed_incr >= self.switch_speed:

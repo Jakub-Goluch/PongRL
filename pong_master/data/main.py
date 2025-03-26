@@ -1,5 +1,4 @@
 
-
 from .control import Control
 
 def main(fullscreen, difficulty, size):
