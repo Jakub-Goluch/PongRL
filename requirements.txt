@@ -1,0 +1,3 @@
+pytorch
+matplotlib==3.9
+ipython
