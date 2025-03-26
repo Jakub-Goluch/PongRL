@@ -1,9 +1,40 @@
 import redis
+import subprocess
+import os
+import random
+from replayMemory import Transition, ReplayMemory
 
-r = redis.Redis()
-pubsub = r.pubsub()
-pubsub.subscribe("paddle", "ball_x", "ball_y")
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
-for message in pubsub.listen():
-    if message['type'] == 'message':
-        print(f'{message["channel"]}: {message["data"]}')
+
+device = torch.device(
+    "cuda" if torch.cuda.is_available() else
+    "mps" if torch.backends.mps.is_available() else
+    "cpu"
+)
+
+
+os.chdir('pong-master')
+
+process = subprocess.Popen(
+    ['python', 'game.py'],
+    stdout=subprocess.PIPE,
+    text=True
+)
+
+while True:
+    line = process.stdout.readline().strip().split()
+    try:
+        line = [int(x) for x in line]
+        state = torch.FloatTensor(line[0:3])
+        state = [(x - torch.min(state)) / (torch.max(state - torch.min(state))) for x in state]
+        if not line:
+            break
+        print(f"Odebrano: {line}")
+    except ValueError:
+        pass
+        
+
+

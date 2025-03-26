@@ -88,6 +88,7 @@ class Classic(tools.States):
             if hit_side:
                 self.adjust_score(hit_side)
             self.movement(keys)
+            print(self.ball.rect[0], self.ball.rect[1], self.paddle_right.rect[1], self.score[0], self.score[1], flush=True)
         else:
             self.pause_text, self.pause_rect = self.make_text("PAUSED",
                 (255,255,255), self.screen_rect.center, 50)

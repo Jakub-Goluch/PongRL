@@ -16,6 +16,8 @@ class AIPaddle:
             num = 2
         elif self.difficulty == 'easy':
             num = 3
+
+        num = 6
             
         surf = pg.Surface([self.screen_rect.width / num, self.screen_rect.height])
         self.screen_response_area_rect = surf.get_rect()
