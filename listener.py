@@ -9,6 +9,9 @@ import pyautogui
 import time
 from pynput.keyboard import Key, Controller
 from threading import Thread
+from collections import deque
+import select
+from queue import Queue, Empty
 
 keyboard = Controller()
 
@@ -34,15 +37,18 @@ device = torch.device(
 
 os.chdir('pong_master')
 
-process = None
+process: subprocess = None
 
 
 def open_game():
     global process
     process = subprocess.Popen(
-        ['python', 'game.py'],
+        ['python', '-u', 'game.py'],
         stdout=subprocess.PIPE,
-        text=True)
+        text=True,
+        bufsize=0
+    )
+
 
     while True:
         line = process.stdout.readline().strip().split()
@@ -51,13 +57,13 @@ def open_game():
             time.sleep(1)
             pyautogui.press("up")
             pyautogui.press("up")
-            time.sleep(0.5)
+            # time.sleep(0.5)
             keyboard.press(Key.enter)
             keyboard.release(Key.enter)
-            time.sleep(1)
+            time.sleep(0.3)
             pyautogui.press("up")
             pyautogui.press("up")
-            time.sleep(0.5)
+            # time.sleep(0.5)
             keyboard.press(Key.enter)
             keyboard.release(Key.enter)
             break
@@ -140,18 +146,17 @@ def select_action(state):
 #         else:
 #             display.display(plt.gcf())
 
+open_game()
+time.sleep(0.1)
 
 if torch.cuda.is_available() or torch.backends.mps.is_available():
     num_episodes = 600
 else:
     num_episodes = 50
 
-open_game()
-time.sleep(0.1)
 
 for i_episode in range(num_episodes):
     # Initialize the environment and get its state
-
     line = process.stdout.readline().strip().split()
     try:
         line = [int(x) for x in line]
@@ -181,7 +186,7 @@ for i_episode in range(num_episodes):
 
             print(line)
 
-            reward = line[4] - line[3]
+            reward = - line[4]
 
             reward = torch.tensor([reward], device=device)
             done = line[3] > 0

@@ -35,6 +35,7 @@ class Classic(tools.States):
         self.paddle_right = paddle.Paddle(pad_right,paddle_y, paddle_width,paddle_height, (150,150,150))
 
         self.ai = AI.AIPaddle(self.screen_rect, self.ball.rect, difficulty)
+        self.number_of_iterations = 0
         
     def reset(self):
         self.pause = False
@@ -88,8 +89,12 @@ class Classic(tools.States):
                 self.paddle_right.rect.y = self.screen_rect.centery - (100 // 2)
                 # self.reset()
             self.movement(keys)
-            print(self.ball.rect[0], self.ball.rect[1], self.paddle_right.rect[1], self.score[1], self.ball.point, flush=True)
-            self.ball.point = 0
+            if self.number_of_iterations > 10:
+                print(self.ball.rect[0], self.ball.rect[1], self.paddle_right.rect[1], self.score[0], self.ball.dist_to_right_paddle, flush=True)
+                self.ball.point = 0
+                self.number_of_iterations = 0
+            else:
+                self.number_of_iterations += 1
         else:
             self.pause_text, self.pause_rect = self.make_text("PAUSED",
                 (255,255,255), self.screen_rect.center, 50)

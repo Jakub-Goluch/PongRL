@@ -1,3 +1,4 @@
+import math
 
 import pygame as pg
 import random
@@ -5,7 +6,7 @@ from . import tools
 
 
 class Ball:
-    def __init__(self, screen_rect, width, height, color=(255,255,255), menu=False, speed=3):
+    def __init__(self, screen_rect, width, height, color=(255, 255, 255), menu=False, speed=3):
         self.menu = menu
         self.width = width
         self.height = height
@@ -23,13 +24,14 @@ class Ball:
         self.sound_init()
         self.moving_away_from_AI = False
         self.point = 0
-        
+        self.dist_to_right_paddle = 0
+
     def sound_init(self):
         self.bounce = tools.Sound('boing.wav')
         self.bounce.sound.set_volume(.5)
         self.gutter = tools.Sound('whoosh.wav')
         self.gutter.sound.set_volume(.1)
-        
+
     def get_random_float(self):
         '''get float for velocity of ball on starting direction'''
         while True:
@@ -39,8 +41,7 @@ class Ball:
                 continue
             else:
                 return num
-        
-        
+
     def set_ball(self):
         x = self.get_random_float() + 1
         y = self.get_random_float()
@@ -49,10 +50,10 @@ class Ball:
         self.vel = [x, y]
         self.rect.center = self.center_screen
         self.true_pos = list(self.rect.center)
-        
-        self.speed = self.speed_init #reset speed
+
+        self.speed = self.speed_init  # reset speed
         self.speed_incr = 0
-        
+
     def collide_walls(self):
         if self.rect.x < 0:
             if not self.menu:
@@ -64,17 +65,17 @@ class Ball:
                 self.gutter.sound.play()
                 self.set_ball()
                 return 1
-            
+
         if self.rect.y < 0 or self.rect.y > self.screen_rect.bottom - self.height:
             if not self.menu:
                 self.bounce.sound.play()
             self.vel[1] *= -1
-            
+
         if self.menu:
-            if self.rect.x < 0 or self.rect.x > self.screen_rect.right- self.height:
+            if self.rect.x < 0 or self.rect.x > self.screen_rect.right - self.height:
                 self.vel[0] *= -1
         return 0
-            
+
     def collide_paddle(self, paddle_left_rect, paddle_right_rect):
         if self.rect.colliderect(paddle_left_rect):
             if not self.menu:
@@ -90,17 +91,19 @@ class Ball:
             self.vel[0] *= -1
             self.speed_incr += 1
             self.point = 1
-            
+
     def move(self):
         self.true_pos[0] += self.vel[0] * self.speed
         self.true_pos[1] += self.vel[1] * self.speed
         self.rect.center = self.true_pos
-        
+
     def update(self, paddle_left_rect, paddle_right_rect):
         hit_side = self.collide_walls()
         if hit_side:
             return hit_side
         self.move()
+        self.dist_to_right_paddle = pow((self.rect.center[0] - paddle_right_rect[0]), 2) + pow((
+                    self.rect.center[1] - paddle_right_rect[1]), 2)
         # print(self.rect.center)
         self.collide_paddle(paddle_left_rect, paddle_right_rect)
         if self.speed_incr >= self.switch_speed:
@@ -109,4 +112,3 @@ class Ball:
 
     def render(self, screen):
         screen.blit(self.surface, self.rect)
-        
