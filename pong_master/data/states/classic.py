@@ -58,9 +58,9 @@ class Classic(tools.States):
                 self.pause = not self.pause
         elif event.type == self.background_music.track_end:
             self.background_music.track = (self.background_music.track+1) % len(self.background_music.tracks)
-            pg.mixer.music.load(self.background_music.tracks[self.background_music.track]) 
-            pg.mixer.music.play()
-                    
+            # pg.mixer.music.load(self.background_music.tracks[self.background_music.track])
+            # pg.mixer.music.play()
+            #
     def movement(self, keys):
         if self.ai.move_up:
             self.paddle_left.move(0, -1)
@@ -90,7 +90,7 @@ class Classic(tools.States):
                 # self.reset()
             self.movement(keys)
             if self.number_of_iterations > 10:
-                print(self.ball.rect[0], self.ball.rect[1], self.paddle_right.rect[1], self.score[0], self.ball.dist_to_right_paddle, flush=True)
+                print(self.ball.rect[0], self.ball.rect[1], self.paddle_right.rect[1], self.score[0], self.ball.point, self.score[1], flush=True)
                 self.ball.point = 0
                 self.number_of_iterations = 0
             else:
@@ -118,8 +118,10 @@ class Classic(tools.States):
             self.score[0] += 1
             
     def cleanup(self):
-        pg.mixer.music.stop()
-        self.background_music.setup(self.background_music_volume)
+        # pg.mixer.music.stop()
+        # self.background_music.setup(self.background_music_volume)
+        pass
         
     def entry(self):
-        pg.mixer.music.play()
+        # pg.mixer.music.play()
+        pass

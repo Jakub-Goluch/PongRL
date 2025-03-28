@@ -8,26 +8,20 @@ from itertools import count
 import pyautogui
 import time
 from pynput.keyboard import Key, Controller
-from threading import Thread
-from collections import deque
-import select
-from queue import Queue, Empty
-
-keyboard = Controller()
 
 import torch
 import torch.optim as optim
 
-from replayMemory import Transition, ReplayMemory
+from replayMemory import ReplayMemory
 from dqn import DQN
 from training_loop import optimize_model
 
-# # set up matplotlib
-# is_ipython = 'inline' in matplotlib.get_backend()
-# if is_ipython:
-#     from IPython import display
-#
-# plt.ion()
+# set up matplotlib
+is_ipython = 'inline' in matplotlib.get_backend()
+if is_ipython:
+    from IPython import display
+
+plt.ion()
 
 device = torch.device(
     "cuda" if torch.cuda.is_available() else
@@ -39,16 +33,17 @@ os.chdir('pong_master')
 
 process: subprocess = None
 
+keyboard = Controller()
 
-def open_game():
+
+def open_game(mode="easy0"):
     global process
     process = subprocess.Popen(
-        ['python', '-u', 'game.py'],
+        ['python', '-u', 'game.py', '-d', mode],
         stdout=subprocess.PIPE,
         text=True,
         bufsize=0
     )
-
 
     while True:
         line = process.stdout.readline().strip().split()
@@ -83,8 +78,8 @@ BATCH_SIZE = 128
 GAMMA = 0.99
 EPS_START = 0.9
 EPS_END = 0.05
-EPS_DECAY = 1000
-TAU = 0.95
+EPS_DECAY = 10000
+TAU = 0.005
 LR = 1e-4
 
 # Get number of actions
@@ -118,42 +113,45 @@ def select_action(state):
         return torch.tensor([[random.randint(0, 1)]], device=device, dtype=torch.long)
 
 
-# episode_durations = []
-#
-#
-# def plot_durations(show_result=False):
-#     plt.figure(1)
-#     durations_t = torch.tensor(episode_durations, dtype=torch.float)
-#     if show_result:
-#         plt.title('Result')
-#     else:
-#         plt.clf()
-#         plt.title('Training...')
-#     plt.xlabel('Episode')
-#     plt.ylabel('Duration')
-#     plt.plot(durations_t.numpy())
-#     # Take 100 episode averages and plot them too
-#     if len(durations_t) >= 100:
-#         means = durations_t.unfold(0, 100, 1).mean(1).view(-1)
-#         means = torch.cat((torch.zeros(99), means))
-#         plt.plot(means.numpy())
-#
-#     plt.pause(0.001)  # pause a bit so that plots are updated
-#     if is_ipython:
-#         if not show_result:
-#             display.display(plt.gcf())
-#             display.clear_output(wait=True)
-#         else:
-#             display.display(plt.gcf())
+episode_durations = []
+score_when_lost = []
 
-open_game()
-time.sleep(0.1)
+
+def plot_durations(show_result=False):
+    plt.figure(1)
+    durations_t = torch.tensor(episode_durations, dtype=torch.float)
+    score_t = torch.tensor(score_when_lost, dtype=torch.float)
+    if show_result:
+        plt.title('Result')
+    else:
+        plt.clf()
+        plt.title('Training...')
+    plt.xlabel('Episode')
+    plt.ylabel('Duration')
+    plt.plot(durations_t.numpy())
+    plt.plot(score_t.numpy())
+    # Take 100 episode averages and plot them too
+    if len(durations_t) >= 100:
+        means = durations_t.unfold(0, 100, 1).mean(1).view(-1)
+        means = torch.cat((torch.zeros(99), means))
+        plt.plot(means.numpy())
+
+    plt.pause(0.001)  # pause a bit so that plots are updated
+    if is_ipython:
+        if not show_result:
+            display.display(plt.gcf())
+            display.clear_output(wait=True)
+        else:
+            display.display(plt.gcf())
+
 
 if torch.cuda.is_available() or torch.backends.mps.is_available():
-    num_episodes = 600
+    num_episodes = 3500
 else:
     num_episodes = 50
 
+open_game()
+time.sleep(0.1)
 
 for i_episode in range(num_episodes):
     # Initialize the environment and get its state
@@ -179,14 +177,21 @@ for i_episode in range(num_episodes):
 
             line = process.stdout.readline().strip().split()
             line = [int(x) for x in line]
+            line[0] *= 5/8
+            line[1] *= 5/6
             observation = torch.tensor(line[0:3], device=device)
             observation = torch.tensor(
                 [(x - torch.min(observation)) / (torch.max(observation - torch.min(observation))) * 2 - 1 for x in
                  observation], device=device)
 
             print(line)
-
-            reward = - line[4]
+            if line[0] < 200:
+                reward = line[4] + 0.2
+            else:
+                if (line[1] > 250 and line[2] > 250) or (line[1] < 250 and line[2] < 250):
+                    reward = line[4] - line[3] + 0.2
+                else:
+                    reward = line[4] - line[3] - 0.2
 
             reward = torch.tensor([reward], device=device)
             done = line[3] > 0
@@ -220,16 +225,35 @@ for i_episode in range(num_episodes):
             target_net.load_state_dict(target_net_state_dict)
 
             if done:
-                # episode_durations.append(t + 1)
-                # plot_durations()
+                score_when_lost.append(line[5])
+                episode_durations.append(t + 1)
+                plot_durations()
                 process.terminate()
-                open_game()
+                gamemode = "easy0"
+                match i_episode:
+                    case _ if i_episode <= 500:
+                        gamemode = "easy0"
+                    case _ if i_episode <= 1000:
+                        gamemode = "easy1"
+                    case _ if i_episode <= 1500:
+                        gamemode = "easy2"
+                    case _ if i_episode <= 2000:
+                        gamemode = "easy3"
+                    case _ if i_episode <= 2500:
+                        gamemode = "easy4"
+                    case _ if i_episode <= 3000:
+                        gamemode = "easy5"
+                    case _ if i_episode <= 3500:
+                        gamemode = "easy6"
+                open_game(mode=gamemode)
                 break
     except ValueError:
         pass
 
+torch.save(target_net.state_dict(), "target_dqn.pth")
+torch.save(policy_net.state_dict(), "policy_dqn.pth")
 
-# print('Complete')
-# plot_durations(show_result=True)
-# plt.ioff()
-# plt.show()
+print('Complete')
+plot_durations(show_result=True)
+plt.ioff()
+plt.show()

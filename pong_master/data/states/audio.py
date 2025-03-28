@@ -53,10 +53,10 @@ class Audio(tools.States):
                 #self.button_sound.sound.play()
                 self.done = True
                 self.next = 'MENU'
-            elif event.key in [pg.K_PLUS, pg.K_EQUALS]:
-                self.bg_music_modify(.1, 'play')
-            elif event.key in [pg.K_MINUS, pg.K_UNDERSCORE]:
-                self.bg_music_modify(-.1, 'play')
+            # elif event.key in [pg.K_PLUS, pg.K_EQUALS]:
+            #     self.bg_music_modify(.1, 'play')
+            # elif event.key in [pg.K_MINUS, pg.K_UNDERSCORE]:
+            #     self.bg_music_modify(-.1, 'play')
         self.mouse_menu_click(event)
 
     def update(self, now, keys):

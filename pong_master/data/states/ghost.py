@@ -55,7 +55,7 @@ class Ghost(classic.Classic):
         self.ai.reset()
         
     def cleanup(self):
-        pg.mixer.music.stop()
+        # pg.mixer.music.stop()
         self.background_music.setup(self.background_music_volume)
         self.fake_balls = []
         

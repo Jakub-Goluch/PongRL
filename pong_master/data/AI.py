@@ -9,15 +9,25 @@ class AIPaddle:
         self.move_up = False
         self.move_down = False
         self.screen_response_area_rect = self.screen_rect
-        
-        if self.difficulty == 'hard':
-            num = 1
-        elif self.difficulty == 'medium':
-            num = 2
-        elif self.difficulty == 'easy':
-            num = 3
 
         num = 60
+
+        if self.difficulty == 'easy6':
+            num = 2
+        elif self.difficulty == 'easy5':
+            num = 3
+        elif self.difficulty == 'easy4':
+            num = 5
+        elif self.difficulty == 'easy3':
+            num = 10
+        elif self.difficulty == 'easy2':
+            num = 20
+        elif self.difficulty == 'easy1':
+            num = 30
+        elif self.difficulty == 'easy0':
+            num = 60
+
+        # num = 60
             
         surf = pg.Surface([self.screen_rect.width / num, self.screen_rect.height])
         self.screen_response_area_rect = surf.get_rect()

@@ -28,9 +28,9 @@ class Ball:
 
     def sound_init(self):
         self.bounce = tools.Sound('boing.wav')
-        self.bounce.sound.set_volume(.5)
+        self.bounce.sound.set_volume(.0)
         self.gutter = tools.Sound('whoosh.wav')
-        self.gutter.sound.set_volume(.1)
+        self.gutter.sound.set_volume(.0)
 
     def get_random_float(self):
         '''get float for velocity of ball on starting direction'''

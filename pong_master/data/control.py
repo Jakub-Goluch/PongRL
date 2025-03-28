@@ -8,9 +8,9 @@ class Control():
         pg.mixer.pre_init(44100, -16, 1, 512)
         pg.init()
         pg.display.set_caption("Pong")
-        self.screensize = (int(size[0]), int(size[1]))
+        # self.screensize = (int(size[0]), int(size[1]))
         # self.screensize = (int(size.split('x')[0]), int(size.split('x')[1]))
-        # self.screensize = (800,600)
+        self.screensize = (800,600)
         if fullscreen:
             self.screen = pg.display.set_mode(self.screensize, pg.FULLSCREEN)
         else:
@@ -18,7 +18,7 @@ class Control():
             self.screen = pg.display.set_mode(self.screensize)
         self.screen_rect = self.screen.get_rect()
         self.clock = pg.time.Clock()
-        self.fps = 30
+        self.fps = 45
         self.keys = pg.key.get_pressed()
         self.done = False
         self.state_dict = {
