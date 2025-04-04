@@ -80,7 +80,7 @@ EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 10000
 TAU = 0.005
-LR = 1e-4
+LR = 1e-5
 
 # Get number of actions
 n_actions = 2
@@ -89,12 +89,14 @@ n_observations = 3
 
 policy_net = DQN(n_observations, n_actions).to(device)
 target_net = DQN(n_observations, n_actions).to(device)
-target_net.load_state_dict(policy_net.state_dict())
+# target_net.load_state_dict(policy_net.state_dict())
+policy_net.load_state_dict(torch.load("policy_dqn.pth"))
+target_net.load_state_dict(torch.load("target_dqn.pth"))
 
 optimizer = optim.AdamW(policy_net.parameters(), lr=LR, amsgrad=True)
 memory = ReplayMemory(10000)
 
-steps_done = 0
+steps_done = 3500
 
 
 def select_action(state):
@@ -146,7 +148,7 @@ def plot_durations(show_result=False):
 
 
 if torch.cuda.is_available() or torch.backends.mps.is_available():
-    num_episodes = 3500
+    num_episodes = 10000
 else:
     num_episodes = 50
 
@@ -189,9 +191,10 @@ for i_episode in range(num_episodes):
                 reward = line[4] + 0.2
             else:
                 if (line[1] > 250 and line[2] > 250) or (line[1] < 250 and line[2] < 250):
-                    reward = line[4] - line[3] + 0.2
+                    reward = 2 * line[4] - 3 * line[3] + 0.2
                 else:
-                    reward = line[4] - line[3] - 0.2
+                    reward = 2 * line[4] - 3 * line[3] - 0.5
+
 
             reward = torch.tensor([reward], device=device)
             done = line[3] > 0
@@ -250,8 +253,8 @@ for i_episode in range(num_episodes):
     except ValueError:
         pass
 
-torch.save(target_net.state_dict(), "target_dqn.pth")
-torch.save(policy_net.state_dict(), "policy_dqn.pth")
+torch.save(target_net.state_dict(), "target_dqn2.pth")
+torch.save(policy_net.state_dict(), "policy_dqn2.pth")
 
 print('Complete')
 plot_durations(show_result=True)
